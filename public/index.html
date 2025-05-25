@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora FIFO Criptomonedas</title>
+    <style>
+        :root {
+            --primary-color: #0070f3;
+            --primary-hover: #0051b3;
+            --secondary-color: #0070f3;
+            --secondary-hover: #0051b3;
+            --background-dark: #000000;
+            --container-dark: #111111;
+            --text-light: #ffffff;
+            --text-muted: #888888;
+            --error-color: #ff0000;
+            --success-color: #0070f3;
+            --border-radius: 8px;
+            --spacing-unit: 1rem;
+            --gradient-start: #0070f3;
+            --gradient-end: #00b4d8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 112, 243, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 180, 216, 0.15), transparent 25%);
+        }
+
+        .container {
+            background-color: var(--container-dark);
+            padding: calc(var(--spacing-unit) * 2);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            width: 95%;
+            max-width: 800px;
+            margin: var(--spacing-unit);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+            font-weight: 700;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        p {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: var(--spacing-unit);
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        pre {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: var(--spacing-unit);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+            margin: var(--spacing-unit) 0;
+            overflow-x: auto;
+            font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: clamp(150px, 30vh, 300px);
+            margin: var(--spacing-unit) 0;
+            padding: var(--spacing-unit);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: var(--text-light);
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-unit);
+            margin: calc(var(--spacing-unit) * 1.5) 0;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1.5rem, 4vw, 2.4rem);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error {
+            color: var(--error-color);
+            background-color: rgba(255, 0, 0, 0.1);
+            padding: var(--spacing-unit);
+            border-radius: var(--border-radius);
+            margin: var(--spacing-unit) 0;
+            display: none;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        .success {
+            color: var(--success-color);
+            background-color: rgba(0, 112, 243, 0.1);
+            padding: var(--spacing-unit);
+            border-radius: var(--border-radius);
+            margin: var(--spacing-unit) 0;
+            display: none;
+            border: 1px solid rgba(0, 112, 243, 0.2);
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+            color: var(--text-muted);
+            margin: var(--spacing-unit) 0;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        .download-btn {
+            background-color: var(--secondary-color);
+        }
+
+        .download-btn:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        /* Tablet and larger screens */
+        @media (min-width: 768px) {
+            .container {
+                padding: calc(var(--spacing-unit) * 2.5);
+            }
+
+            .button-container {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            button {
+                width: auto;
+                min-width: 200px;
+            }
+        }
+
+        /* Landscape mode on mobile */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                margin: calc(var(--spacing-unit) / 2);
+            }
+
+            textarea {
+                height: 120px;
+            }
+        }
+
+        /* High-DPI screens */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+
+        .output-container {
+            margin-top: var(--spacing-unit);
+            display: none;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: calc(var(--spacing-unit) / 2);
+        }
+
+        .output-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .copy-button {
+            background: none;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            width: auto;
+            max-width: none;
+        }
+
+        .copy-button:hover {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        .output-text {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: var(--spacing-unit);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .copy-success {
+            color: var(--success-color);
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FIFO Crypto Calculator</h1>
+        <p>Pega tus datos CSV en el siguiente formato:</p>
+        <pre>Fecha,Tipo,Cripto,Cantidad,Precio Unitario (EUR)</pre>
+        <textarea id="csvInput" placeholder="Pega tus datos CSV aquí..."></textarea>
+        <div id="error" class="error"></div>
+        <div id="success" class="success"></div>
+        <div id="loading" class="loading">Procesando</div>
+        <div class="button-container">
+            <button id="calculateBtn" onclick="calculateFIFO()">Calcular FIFO</button>
+            <button id="downloadBtn" class="download-btn" onclick="downloadResults()" style="display: none;">Descargar Resultados</button>
+        </div>
+        <div id="outputContainer" class="output-container">
+            <div class="output-header">
+                <span class="output-title">Resultado CSV:</span>
+                <div style="display: flex; align-items: center;">
+                    <button class="copy-button" onclick="copyToClipboard()">Copiar al Portapapeles</button>
+                    <span id="copySuccess" class="copy-success">¡Copiado!</span>
+                </div>
+            </div>
+            <div id="outputText" class="output-text"></div>
+        </div>
+    </div>
+
+    <script>
+        let calculationBlob = null;
+        let csvContent = null;
+
+        async function calculateFIFO() {
+            const csvInput = document.getElementById('csvInput');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+            const loadingDiv = document.getElementById('loading');
+            const outputContainer = document.getElementById('outputContainer');
+            const outputText = document.getElementById('outputText');
+            
+            // Reset UI
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            outputContainer.style.display = 'none';
+            calculateBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+            calculationBlob = null;
+            csvContent = null;
+
+            try {
+                const response = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ csv: csvInput.value })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details || errorData.error || 'Error al procesar los datos');
+                }
+
+                // Get both blob and text content
+                const blob = await response.blob();
+                calculationBlob = blob;
+                
+                // Read the CSV content
+                const text = await blob.text();
+                csvContent = text;
+                
+                // Show success message and buttons
+                successDiv.textContent = '¡Cálculo completado con éxito!';
+                successDiv.style.display = 'block';
+                downloadBtn.style.display = 'block';
+                
+                // Show CSV content
+                outputText.textContent = text;
+                outputContainer.style.display = 'block';
+                
+                // Clear the input
+                csvInput.value = '';
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                calculateBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        function downloadResults() {
+            if (!calculationBlob) {
+                return;
+            }
+
+            const url = window.URL.createObjectURL(calculationBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fifo_calculations.csv';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        async function copyToClipboard() {
+            if (!csvContent) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(csvContent);
+                const copySuccess = document.getElementById('copySuccess');
+                copySuccess.style.display = 'inline';
+                setTimeout(() => {
+                    copySuccess.style.display = 'none';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+        }
+    </script>
+</body>
+</html> 
