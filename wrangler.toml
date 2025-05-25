@@ -6,10 +6,12 @@ bucket = "./public"
 
 [build]
 command = "npm run build"
-upload.format = "service-worker"
-
-[env.production]
-workers_dev = true
 
 [pages]
-build_output_dir = "dist" 
+pages_build_output_dir = "public"
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+workers_dev = true 
